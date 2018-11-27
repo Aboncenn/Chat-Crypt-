@@ -1,10 +1,12 @@
 import socket
 import select
 import sys
+from Crypto.Cipher import AES
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 if len(sys.argv) != 5 and len(sys.argv) != 4:
-    print "Correct usage: script, IP address, port number and pseudonyme"
+    print("Correct usage: script, IP address, port number and pseudonyme")
     exit()
 
 #Ajout info ip/port
@@ -23,24 +25,26 @@ while True:
 
     # maintains a list of possible input streams
     sockets_list = [sys.stdin, server]
-    """ There are two possible input situations. Either the
-    user wants to give  manual input to send to other people,
-    or the server is sending a message  to be printed on the
-    screen. Select returns from sockets_list, the stream that
-    is reader for input. So for example, if the server wants
-    to send a message, then the if condition will hold true
-    below.If the user wants to send a message, the else
-    condition will evaluate as true"""
     read_sockets,write_socket, error_socket = select.select(sockets_list,[],[])
 
     for socks in read_sockets:
         if socks == server:
             message = socks.recv(2048)
-            print message
+            print(message)
         else:
-            message = sys.stdin.readline()
-            server.send(message)
-            sys.stdout.write(Pseudo + " > ")
-            sys.stdout.write(message)
-            sys.stdout.flush()
+
+            if pasphrase != 0:
+                message = sys.stdin.readline()
+                server.send(message)
+                sys.stdout.write(Pseudo + " > ")
+                sys.stdout.write(message)
+                sys.stdout.flush()
+            else:
+                message = sys.stdin.readline().encode("utf-8")
+                server.send(message)
+                sys.stdout.write(Pseudo + " > ")
+                sys.stdout.write(message.decode())
+                sys.stdout.flush()
+
+
 server.close()

@@ -2,7 +2,7 @@ import socket
 import select
 import sys
 from Crypto.Cipher import AES
-
+import hashlib
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 if len(sys.argv) != 5 and len(sys.argv) != 4:
@@ -17,7 +17,11 @@ server.connect((IP_address, Port))
 Pseudo = str(sys.argv[3])
 # Ajout de la passphrase
 if len(sys.argv) == 5:
-    pasphrase = str(sys.argv[4]);
+    pasphrase = sys.argv[4].encode("utf-8");
+    m = hashlib.md5()
+    m.update(pasphrase)
+    m = m.hexdigest()
+    encryption_suite = AES.new(m, AES.MODE_CFB, 'This is an IV456')
 else:
     pasphrase = 0;
 
@@ -34,10 +38,12 @@ while True:
         else:
 
             if pasphrase != 0:
-                message = sys.stdin.readline()
+                message = sys.stdin.readline().encode("utf-8")
+                cipher_text = encryption_suite.encrypt(message)
+                server.send(cipher_text)
                 server.send(message)
                 sys.stdout.write(Pseudo + " > ")
-                sys.stdout.write(message)
+                sys.stdout.write(message.decode())
                 sys.stdout.flush()
             else:
                 message = sys.stdin.readline().encode("utf-8")

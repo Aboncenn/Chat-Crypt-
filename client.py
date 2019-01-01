@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# Basé sur internet et sur le travail d'Anael
+
 import socket
 import select
 from threading import Thread
